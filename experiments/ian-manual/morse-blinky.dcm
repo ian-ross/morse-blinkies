@@ -1,0 +1,27 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP 74HC15
+D Triple 3-input AND
+K TTL And3
+F http://www.ti.com/lit/gpn/sn74LS15
+$ENDCMP
+#
+$CMP 74HC21
+D Dual 4-input AND
+K TTL And4
+F http://www.ti.com/lit/gpn/sn74LS21
+$ENDCMP
+#
+$CMP 74HC32
+D Quad 2-input OR
+K TTL Or2
+F http://www.ti.com/lit/gpn/sn74LS32
+$ENDCMP
+#
+$CMP 74HC393
+D Dual BCD 4-bit counter
+K TTL CNT CNT4
+F 74xx\74LS393.pdf
+$ENDCMP
+#
+#End Doc Library
