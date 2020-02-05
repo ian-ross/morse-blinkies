@@ -1,7 +1,13 @@
 package main
 
-import "github.com/ian-ross/morse-blinkies/mbaas/processing"
+import (
+	"os"
+	"strings"
+
+	"github.com/ian-ross/morse-blinkies/mbaas/processing"
+)
 
 func main() {
-	processing.MakeBoard("Hello")
+	s := strings.Join(os.Args[1:], " ")
+	processing.MakeBoard(s, 0)
 }
