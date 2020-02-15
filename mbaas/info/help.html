@@ -1,0 +1,138 @@
+<!doctype html>
+<HTML lang="en">
+  <HEAD>
+    <META charset="utf-8">
+    <META name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <LINK rel="stylesheet" href="/assets/bootstrap.min.css">
+    <SCRIPT src="/assets/jquery-3.4.1.slim.min.js"></SCRIPT>
+    <SCRIPT src="/assets/bootstrap.min.js"></SCRIPT>
+    <SCRIPT src="/assets/script.js"></SCRIPT>
+    <TITLE>Morse Blinkies as a Service</TITLE>
+  </HEAD>
+  <BODY>
+    <HEADER>
+      <NAV class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <A class="navbar-brand" href="/">Morse Blinkies as a Service</A>
+      </NAV>
+    </HEADER>
+    <MAIN>
+      <DIV class="container mt-4">
+        <H3>What is this?</H3>
+
+        <P>I've been studying from <A href="https://contextualelectronics.com/">Contextual
+          Electronics</A>, and had a silly idea on the back of one of
+          their "make a blinky" tutorials. Wouldn't it be cool to have
+          Morse blinkies? (Not really.) And wouldn't it be cool to
+          generate them programmatically on demand? (Er. No.)</P>
+
+        <P>So, we've had PaaS (Platform as a Service), IaaS
+          (Infrastructure as a Service), SaaS (Software as a Server).
+          But is the world ready for Morse Blinkies as a Service?
+          (MBaaS, obviously.)</P>
+
+        <H3>Enough talk already. I want my blinky!</H3>
+
+        <P>Enter some text on the front page, pick some options, press
+          the big blue button and in a few seconds you'll get a link to
+          a ZIP file containing KiCad files that implement a Morse
+          blinky blinking out your text.</P>
+
+        <P>Here, "KiCad files" means a netlist, some footprint libraries
+          (to keep everything nicely self-contained) and a README
+          telling you what to do with it all. You'll need to do the PCB
+          layout for your blinky yourself: that's the artistic part!</P>
+
+        <H3>What's in my blinky?</H3>
+
+        <P>There's a 555 timer (of course), one or more LEDs with
+          current-limiting resistors, and in between there's some
+          74xx-based logic to decide when to switch the LEDs on and off.</P>
+
+        <P>The logic is just some counters and some AND and OR gates.
+          You count through the bits in the sequence of on/off states
+          you need to blink the message, and use logic based on the bits
+          of the binary count to switch the LEDs on and off.</P>
+
+        <H3>What are the options?</H3>
+
+        <UL>
+          <LI><STRONG>LEDs</STRONG>: you can choose between "blink a
+            single LED" or "blink multiple LED groups, one group per
+            letter". That means you can make a blinky with LEDs laid out
+            in letter shapes.</LI>
+
+          <LI><STRONG>Speed</STRONG>: you can choose a blink rate.</LI>
+
+          <LI><STRONG>Footprints</STRONG>: you can change the footprints
+            used for the different components in the blinky by
+            downloading, editing and reuploading a JSON rules file. Let's
+            consider that advanced usage. You'll figure it out if you
+            really care.</LI>
+        </UL>
+
+        <H3>How does it work?</H3>
+
+        <P>For such a stupid little project, MBaaS uses some
+          surprisingly powerful technology. More stepping on the toes of
+          giants than standing on their shoulders... Here's the process:</P>
+
+        <OL>
+          <LI>Your blinky text is converted into an on/off bit
+            sequence representing Morse dots, dashes and the spaces in
+            between them by some custom Python code.</LI>
+
+          <LI>A representation of the on/off state of each LED at each
+            step in the bit sequence is generated. You can think of this
+            as a big bunch of ANDs feeding into a big OR gate (well, one
+            OR per LED).</LI>
+
+          <LI>The AND/OR logic generated in the previous step (which
+            has one AND per on state, all leading into a mighty big
+            OR) is simplified using the <A href="https://github.com/classabbyamp/espresso-logic">Espresso</A> heuristic logic minimiser. This results in a much smaller and more manageable logic expression to be realised in gates.</LI>
+
+          <LI>The simplified logic from Espresso is placed onto "real"
+            AND and OR gates from commonly available 74xx logic
+            (basically 2-, 3- and 4-input ANDs and 2-input ORs), and
+            those real gates are assigned to real 74xx chips. This is
+            done with some more custom Python code (using a dumb
+            greedy algorithm that does a reasonable job, but could be
+            optimised).</LI>
+
+          <LI>The gate assignments and the connections between the gates
+            are used to drive some code that uses <A href="https://xesscorp.github.io/skidl/docs/_site/">SKIDL</A> to generate a KiCad netlist.</LI>
+        </OL>
+
+        <H3>Why did you do this?</H3>
+
+        <P>Seemed like a good idea at the time. It's obviously
+          completely useless, but since I'm mostly a programmer, not a
+          hardware person, I wanted to see how easy it was to generate
+          hardware programmatically. This application is dumb, but I
+          can think of lots of cases where I might do something like
+          this that aren't dumb. (Also, I've been thinking of it as my
+          "compile to silicon" project, which makes it sound a hundred
+          times more cool than it is.)</P>
+
+        <P>If SKIDL was more fully integrated into KiCad's schematic
+          editor, for example, so that you could include blocks of
+          SKIDL code as components in your schematics, you'd open up a
+          lot of possibilities. The tedious things where a schematic
+          is no real benefit (bypass caps, connecting buses, repeated
+          patterns of components), you could do with SKIDL, but you
+          could still have the benefit of having a schematic for the
+          parts where that visual representation is helpful.</P>
+
+        <H3>Wow!  What's next for MBaaS?</H3>
+
+        <P>Eh, not much, to be honest. It's mostly a joke. And not
+          even a very funny one.</P>
+
+        <P>You could improve it in various ways. You could improve the
+          logic placement algorithm (which is, being generous, not of
+          the highest quality). You could generate a schematic as well
+          as a netlist. You could generate a simulation of the blinky
+          using something like <A href="http://www.cburch.com/logisim/index.html">Logisim</A> to verify that it works (Logisim is a nice little tool). You could (somehow) make the output more editable/customisable (that would probably need some SKIDL integration into Eeschema).</P>
+      </DIV>
+</MAIN>
+</BODY>
+</HTML>

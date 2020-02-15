@@ -1,9 +1,39 @@
 EESchema-DOCLIB  Version 2.0
 #
-$CMP 74HC15
+$CMP 74AHC04
+D Hex Inverter
+K AHCMOS not inv
+F https://assets.nexperia.com/documents/data-sheet/74AHC_AHCT04.pdf
+$ENDCMP
+#
+$CMP 74AHCT04
+D Hex Inverter
+K AHCTMOS not inv
+F https://assets.nexperia.com/documents/data-sheet/74AHC_AHCT04.pdf
+$ENDCMP
+#
+$CMP 74HC04
+D Hex Inverter
+K HCMOS not inv
+F https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf
+$ENDCMP
+#
+$CMP 74HC08
+D Quad And2
+K TTL and2
+F http://www.ti.com/lit/gpn/sn74LS08
+$ENDCMP
+#
+$CMP 74HC11
 D Triple 3-input AND
 K TTL And3
-F http://www.ti.com/lit/gpn/sn74LS15
+F http://www.ti.com/lit/gpn/sn74LS11
+$ENDCMP
+#
+$CMP 74HC193
+D Synchronous 4-bit Up/Down (2 clk) counter
+K TTL CNT CNT4
+F http://www.ti.com/lit/ds/symlink/sn74ls193.pdf
 $ENDCMP
 #
 $CMP 74HC21
@@ -18,10 +48,22 @@ K TTL Or2
 F http://www.ti.com/lit/gpn/sn74LS32
 $ENDCMP
 #
-$CMP 74HC393
-D Dual BCD 4-bit counter
+$CMP 74HCT04
+D Hex Inverter
+K HCTMOS not inv
+F https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf
+$ENDCMP
+#
+$CMP 74LS09
+D Quad 2-input AND Open Collect
+K TTL and2 OpenCol
+F http://www.ti.com/lit/gpn/sn74LS09
+$ENDCMP
+#
+$CMP 74LS193
+D Synchronous 4-bit Up/Down (2 clk) counter
 K TTL CNT CNT4
-F 74xx\74LS393.pdf
+F http://www.ti.com/lit/ds/symlink/sn74ls193.pdf
 $ENDCMP
 #
 #End Doc Library

@@ -1,0 +1,38 @@
+{{define "advanced"}}
+{{template "header" .}}
+<DIV class="container mt-4">
+  <DIV class="alert alert-secondary" role="alert">
+    Wondering what exactly this is?  <A href="/info/help.html">Help</A> is available...
+  </DIV>
+  <DIV class="mt-5">
+    <FORM action="/" method="post">
+      <DIV class="form-group row">
+        <LABEL for="blinky-text"><STRONG>Blinky text</STRONG></LABEL>
+        <INPUT type="text" id="blinky-text" name="blinky-text" class="form-control"
+               required autofocus/>
+        <SMALL id="blinky-text-help" class="form-text text-muted">
+          This is the text your blinky will flash in Morse code.
+        </SMALL>
+      </DIV>
+
+      <DIV class="form-group row mt-4">
+        <LABEL for="blinky-rules"><STRONG>Rules data</STRONG></LABEL>
+        <TEXTAREA id="blinky-rules" name="blinky-rules" class="form-control" rows="10"></TEXTAREA>
+        <SMALL id="blinky-text-help" class="form-text text-muted">
+          Modify the JSON rules data to match what you want from your blinky. You can get examples of what the rules data should look like by making blinkies on the normal page: the <CODE>rules.json</CODE> file is included in the ZIP file you can download.
+        </SMALL>
+      </DIV>
+
+      <DIV class="form-group row mt-4">
+        <BUTTON type="submit" class="btn btn-primary">
+          Make my blinky!
+        </BUTTON>
+      </DIV>
+      <DIV class="row mt-0">
+        <A href="/">Basic version</A>
+      </DIV>
+    </FORM>
+  </DIV>
+</DIV>
+{{template "footer"}}
+{{end}}

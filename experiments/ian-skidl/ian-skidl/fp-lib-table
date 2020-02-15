@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name morse-blinkies)(type KiCad)(uri /home/iross/projects/morse-blinkies/experiments/ian-skidl/morse-blinkies.pretty)(options "")(descr ""))
+)

@@ -1,0 +1,12 @@
+main > .container {
+  padding: 60px 15px 0;
+}
+
+.footer {
+  background-color: #ddd;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
