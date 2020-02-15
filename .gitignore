@@ -124,6 +124,7 @@ celerybeat-schedule
 
 # virtualenv
 .venv
+.envrc
 venv/
 ENV/
 
@@ -155,3 +156,7 @@ cabal.sandbox.config
 cabal.project.local
 .HTF/
 
+mbaas/mbaas
+*.erc
+fp-info-cache
+*_lib_sklib.py
