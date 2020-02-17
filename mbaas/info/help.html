@@ -1,22 +1,23 @@
 <!doctype html>
-<HTML lang="en">
+<HTML lang="en" class="h-100">
   <HEAD>
     <META charset="utf-8">
     <META name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <LINK rel="stylesheet" href="/assets/bootstrap.min.css">
+    <LINK rel="stylesheet" href="/assets/style.css">
     <SCRIPT src="/assets/jquery-3.4.1.slim.min.js"></SCRIPT>
     <SCRIPT src="/assets/bootstrap.min.js"></SCRIPT>
     <SCRIPT src="/assets/script.js"></SCRIPT>
     <TITLE>Morse Blinkies as a Service</TITLE>
   </HEAD>
-  <BODY>
+  <BODY class="d-flex flex-column h-100">
     <HEADER>
       <NAV class="navbar navbar-expand-lg navbar-dark bg-dark">
         <A class="navbar-brand" href="/">Morse Blinkies as a Service</A>
       </NAV>
     </HEADER>
-    <MAIN>
-      <DIV class="container mt-4">
+    <MAIN role="main" class="flex-shrink-0">
+      <DIV class="container">
         <H3>What is this?</H3>
 
         <P>I've been studying from <A href="https://contextualelectronics.com/">Contextual
@@ -133,6 +134,12 @@
           as a netlist. You could generate a simulation of the blinky
           using something like <A href="http://www.cburch.com/logisim/index.html">Logisim</A> to verify that it works (Logisim is a nice little tool). You could (somehow) make the output more editable/customisable (that would probably need some SKIDL integration into Eeschema).</P>
       </DIV>
-</MAIN>
-</BODY>
+    </MAIN>
+    <FOOTER class="footer mt-auto py-3">
+      <DIV class="container">
+        <SPAN class="text-muted">Copyright 2020 Ian Ross.
+          &nbsp;&nbsp;<A href="https://github.com/ian-ross/morse-blinkies">GitHub</A></SPAN>
+      </DIV>
+    </FOOTER>
+  </BODY>
 </HTML>

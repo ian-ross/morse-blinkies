@@ -7,6 +7,7 @@ OR = 2
 # Gates are represented as [<type>, [<input nets>], <output net>]
 
 net_idx = 0
+andint_net_idx = 0
 net_names = {}
 gates = []
 pos_nets = {}
@@ -103,14 +104,14 @@ def make_and(term, out_net):
 
 def make_and_tree(in_nets, out_net):
     global net_idx
+    global andint_net_idx
     global net_names
     global gates
 
-    int_net_idx = 1
     take = []
     while len(in_nets) > 4:
-        int_net = 'andint' + str(int_net_idx)
-        int_net_idx += 1
+        andint_net_idx += 1
+        int_net = 'andint' + str(andint_net_idx)
         net_names[int_net] = net_idx
         net_idx += 1
         if len(take) == 0:
@@ -134,7 +135,7 @@ def input_name(i):
     return chr(ord('a') + i)
 
 
-def assign(gates):
+def assign(gates, info):
     not_gates = [g for g in gates if g[0] == NOT]
     and2_gates = [g for g in gates if g[0] == AND and len(g[1]) == 2]
     and3_gates = [g for g in gates if g[0] == AND and len(g[1]) == 3]
@@ -151,11 +152,23 @@ def assign(gates):
         chips_7411, and2_gates = use_left_overs(chips_7411, left_over, and2_gates, 3, 2)
     chips_7408, dum = alloc_div('74HC08', and2_gates, 4)
 
-    print('7404 hex inverter:      ', len(chips_7404))
-    print('7408 quad 2-input AND:  ', len(chips_7408))
-    print('7411 triple 3-input AND:', len(chips_7411))
-    print('7421 dual 4-input AND:  ', len(chips_7421))
-    print('7432 quad 2-input OR:   ', len(chips_7432))
+    gate_info = {}
+    if len(chips_7404) > 0:
+        print('7404 hex inverter:      ', len(chips_7404))
+        gate_info['7404 hex inverter'] = len(chips_7404)
+    if len(chips_7408) > 0:
+        print('7408 quad 2-input AND:  ', len(chips_7408))
+        gate_info['7408 quad 2-input AND'] = len(chips_7408)
+    if len(chips_7411) > 0:
+        print('7411 triple 3-input AND:', len(chips_7411))
+        gate_info['7408 triple 3-input AND'] = len(chips_7411)
+    if len(chips_7421) > 0:
+        print('7421 dual 4-input AND:  ', len(chips_7421))
+        gate_info['7421 dual 4-input AND'] = len(chips_7421)
+    if len(chips_7432) > 0:
+        print('7432 quad 2-input OR:   ', len(chips_7432))
+        gate_info['7432 quad 2-input OR'] = len(chips_7432)
+    info['chips'] = gate_info
 
     return chips_7404 + chips_7432 + chips_7408 + chips_7411 + chips_7421
 
@@ -177,6 +190,6 @@ def use_left_overs(chips_in, left_over, gates_in, chip_gate_size, gate_size):
     adjust_gates = gates_in[:left_over]
     for i in range(len(adjust_gates)):
         adjust_gates[i][1] += extras
-    chips_in[-1][1].append(adjust_gates)
+    chips_in[-1][1] += adjust_gates
     gates_out = gates_in[left_over:]
     return chips_in, gates_out

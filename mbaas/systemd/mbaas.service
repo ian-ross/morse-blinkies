@@ -1,0 +1,17 @@
+[Unit]
+Description=mbaas
+After=network.target
+ConditionPathExists=/opt/mbaas/bin/mbaas
+
+[Service]
+EnvironmentFile=-/etc/mbaas.env
+ExecStart=/opt/mbaas/bin/start-mbaas
+User=mbaas
+Group=mbaas
+Restart=on-failure
+RestartSec=5
+RestartPreventExitStatus=SIGKILL
+
+[Install]
+WantedBy=multi-user.target
+Alias=mbaas.service

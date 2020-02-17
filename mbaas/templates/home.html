@@ -1,5 +1,5 @@
 {{define "home"}}
-{{template "header" .}}
+{{template "header"}}
 <DIV class="container mt-4">
   <DIV class="alert alert-secondary" role="alert">
     Wondering what exactly this is?  <A href="/info/help.html">Help</A> is available...
@@ -46,7 +46,7 @@
 
       <DIV class="form-group row mt-4">
         <LABEL for="blink-rate"><STRONG>Blink rate</STRONG></LABEL>
-        <SELECT class="form-control" id="blink-rate">
+        <SELECT class="form-control" id="blink-rate" name="blink-rate">
           <OPTION value="125">125 ms</OPTION>
           <OPTION value="250">250 ms</OPTION>
           <OPTION value="500" selected>500 ms</OPTION>

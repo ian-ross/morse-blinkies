@@ -1,0 +1,47 @@
+{{define "output"}}
+{{template "header"}}
+<DIV class="container mt-4">
+  <DIV class="mt-5">
+    <P>Your job is complete!</P>
+
+    <P><A href="{{.URL}}">Download the results</A></P>
+
+    <H2>Parameters</H2>
+
+    <TABLE class="table table-borderless">
+      <TBODY>
+        <TR>
+          <TD>Text</TD>
+          <TD>{{.text}}</TD>
+        </TR>
+        <TR>
+          <TD>Sequence</TD>
+          <TD><EMBED src="/assets/sparkline.svg?{{.padded_sequence}}" type="image/svg+xml" width={{.SparklineWidth}} height=15></TD>
+        </TR>
+      </TBODY>
+    </TABLE>
+
+    <H2>Components</H2>
+
+    <DIV class="row">
+      <DIV class="col-sm">
+        <TABLE class="table table-borderless">
+          <THEAD>
+            <TH>Chip</TH>
+            <TH>Count</TH>
+          </THEAD>
+          <TBODY>
+            {{range $name, $count := .chips}}
+            <TR>
+              <TD>{{$name}}</TD>
+              <TD>{{$count}}</TD>
+            </TR>
+            {{end}}
+          </TBODY>
+        </TABLE>
+      </DIV>
+    </DIV>
+  </DIV>
+</DIV>
+{{template "footer"}}
+{{end}}

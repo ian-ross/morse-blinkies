@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 import sys
 
 import skidl
@@ -18,14 +19,19 @@ def make_board(text, rules):
     print('Making board for:', text)
     print('')
 
+    info = {}
+
     # Convert to Morse mark/space sequence.
     text = text.upper()
+    info['text'] = text
     try:
         seq = sequence.text_to_bit_sequence(text)
     except:
         logging.error('Error generating bit sequence', exc_info=sys.exc_info())
         return
-    print('Bit sequence:', sequence.to_string(seq))
+    seqs = sequence.to_string(seq)
+    print('Bit sequence:', seqs)
+    info['sequence'] = seqs
     print('')
 
     # Padding: either a fixed padding or to next power of two.
@@ -33,7 +39,7 @@ def make_board(text, rules):
     if length > 256:
         print('Sequence too long: maximum length is 256')
         sys.exit(1)
-    if rules['explicit_padding']:
+    if 'explicit_padding' in rules:
         print('Explicit padding not supported: must be power of 2!')
         sys.exit(1)
         length += rules['padding']
@@ -43,7 +49,9 @@ def make_board(text, rules):
     print('Length:', len(seq), '->', length)
     for i in range(npadding):
         seq.append(sequence.SPACE)
-    print('Padded bit sequence:', sequence.to_string(seq))
+    seqs = sequence.to_string(seq)
+    print('Padded bit sequence:', seqs)
+    info['padded_sequence'] = seqs
     print('')
 
     # Convert to Espresso format.
@@ -54,12 +62,14 @@ def make_board(text, rules):
         return
 
     p = placement.place(esp, rules)
-    a = placement.assign(p['gates'])
+    a = placement.assign(p['gates'], info)
     print('')
 
     netlist.skidl_build(length, a, rules)
     skidl.ERC()
     skidl.generate_netlist()
+
+    return info
 
 
 # Command line:
@@ -70,7 +80,7 @@ if __name__ == '__main__':
     if len(sys.argv) < 2 or len(sys.argv) > 3:
         usage()
     text = sys.argv[1]
-    rules_file = 'default_rules.json'
+    rules_file = os.path.join(os.getenv('MBAAS_BASE_DIR'), 'lib/default_rules.json')
     if len(sys.argv) == 3:
         rules_file = sys.argv[2]
     try:
@@ -80,4 +90,6 @@ if __name__ == '__main__':
         logging.error('Error reading rules file', exc_info=sys.exc_info())
         sys.exit(1)
 
-    make_board(text, rules)
+    info = make_board(text, rules)
+    with open("process-mbaas.info", "w") as fp:
+        json.dump(info, fp, indent=2)

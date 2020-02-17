@@ -33,7 +33,7 @@ c = Part('Device', 'C', TEMPLATE, footprint=fp['C'])
 
 def skidl_build(length, gates, rules):
     vdd, gnd = power()
-    osc = oscillator(vdd, gnd, rules['frequency'])
+    osc = oscillator(vdd, gnd, rules['blink_rate_ms'])
     nets, bit_names = counters(vdd, gnd, osc, length)
     out = logic(vdd, gnd, gates, nets)
     blinky(vdd, gnd, out)
@@ -56,7 +56,7 @@ def power():
 # 555 ASTABLE
 
 # TODO: PARAMETERISE OSCILLATOR RATE
-def oscillator(vdd, gnd, frequency):
+def oscillator(vdd, gnd, blink_rate_ms):
     print('SKIDL: oscillator')
     osc = Part(lib, '7555', footprint=fp['SOIC-8'])
     osc['VDD'] += vdd
@@ -184,7 +184,10 @@ def logic(vdd, gnd, gates, nets):
             unit += 1
 
     last_len = len(parts_with_gates) + 1
-    while len(parts_with_gates) != last_len:
+    did_another = False
+    while len(parts_with_gates) != last_len and not did_another:
+        if len(parts_with_gates) == last_len:
+            did_another = True
         last_len = len(parts_with_gates)
 
         for iattempt in range(len(parts_with_gates)):
@@ -204,7 +207,8 @@ def logic(vdd, gnd, gates, nets):
                         part[chr(ord('A') + unit) + 'IN' + str(i+1)] += NC
                 part[chr(ord('A') + unit) + 'OUT'] += NC
             else:
-                if not all([net in nets for net in in_nets]):
+                if not all([net in nets or net == 'vdd' or net == 'gnd'
+                            for net in in_nets]):
                     continue
 
                 if ninputs == 1:
@@ -213,17 +217,25 @@ def logic(vdd, gnd, gates, nets):
                     in_pins = [chr(ord('A') + unit) + 'IN' + str(i+1) for i in range(ninputs)]
                 out_pin = chr(ord('A') + unit) + 'OUT'
                 for i in range(ninputs):
-                    nets[in_nets[i]] += part[in_pins[i]]
-                    print('  ', in_nets[i], '->', chip, in_pins[i])
+                    if in_nets[i] == 'vdd':
+                        vdd += part[in_pins[i]]
+                    elif in_nets[i] == 'gnd':
+                        gnd += part[in_pins[i]]
+                    else:
+                        nets[in_nets[i]] += part[in_pins[i]]
+                    print('  ', in_nets[i], '->', chip, part.ref, in_pins[i])
                 nets[out_net] = Net()
                 nets[out_net] += part[out_pin]
-                print('  ', out_net, '->', chip, out_pin)
+                print('  ', out_net, '->', chip, part.ref, out_pin)
 
             del parts_with_gates[iattempt]
             break
 
     if len(parts_with_gates) != 0:
         print("Something went wrong -- didn't place all gates!")
+        print(nets)
+        print('---')
+        print(parts_with_gates)
         sys.exit(1)
 
     return nets['output']

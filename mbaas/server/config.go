@@ -12,4 +12,17 @@ type Config struct {
 
 	// CSRFSecret is a secret string used for generating CSRF tokens.
 	CSRFSecret string `env:"CSRF_SECRET"`
+
+	// BlinkyScript is the Python script for blinky creation.
+	BlinkyScript string `env:"BLINKY_SCRIPT"`
+
+	// WorkDir is the working directory for blinky creation.
+	WorkDir string `env:"WORKDIR"`
+
+	// OutputDir is the directory where blinky ZIP and HTML explanation
+	// pages are stored.
+	OutputDir string `env:"OUTDIR"`
+
+	// TemplateDir is the directory holding the blinky project template.
+	TemplateDir string `env:"TEMPLATEDIR"`
 }

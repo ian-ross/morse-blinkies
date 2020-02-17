@@ -8,7 +8,7 @@ import (
 	"github.com/ian-ross/morse-blinkies/mbaas/chassis"
 )
 
-func (s *Server) routes(devMode bool, csrfSecret string) chi.Router {
+func (s *Server) routes(devMode bool, csrfSecret string, outputDir string) chi.Router {
 	r := chi.NewRouter()
 
 	chassis.AddCommonMiddleware(r)
@@ -21,7 +21,7 @@ func (s *Server) routes(devMode bool, csrfSecret string) chi.Router {
 	// Static files.
 	FileServer(r, "/assets", http.Dir("assets"))
 	FileServer(r, "/info", http.Dir("info"))
-	FileServer(r, "/jobs", http.Dir("jobs"))
+	FileServer(r, "/output", http.Dir(outputDir))
 
 	return r
 }
@@ -44,20 +44,4 @@ func FileServer(r chi.Router, path string, root http.FileSystem) {
 	r.Get(path, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fs.ServeHTTP(w, r)
 	}))
-}
-
-func (s *Server) home(w http.ResponseWriter, r *http.Request) {
-	s.tmpl.ExecuteTemplate(w, "home", nil)
-}
-
-func (s *Server) advanced(w http.ResponseWriter, r *http.Request) {
-	s.tmpl.ExecuteTemplate(w, "advanced", nil)
-}
-
-func (s *Server) newJob(w http.ResponseWriter, r *http.Request) {
-
-}
-
-func (s *Server) pendingJob(w http.ResponseWriter, r *http.Request) {
-
 }

@@ -1,0 +1,3 @@
+#!/bin/bash
+. $MBAAS_BASE_DIR/python/.venv/bin/activate
+$MBAAS_BASE_DIR/bin/mbaas

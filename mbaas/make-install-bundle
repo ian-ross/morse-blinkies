@@ -1,0 +1,25 @@
+#!/bin/bash
+rm -fr install-root
+mkdir install-root
+mkdir install-root/bin
+mkdir install-root/python
+mkdir install-root/lib
+mkdir install-root/systemd
+
+cp mbaas install-root/bin
+cp start-mbaas install-root/bin
+
+cp python/*.py install-root/python
+
+cp python/default_rules.json install-root/lib
+cp -r project-template install-root/lib
+
+cp systemd/mbaas.service install-root/systemd
+cp systemd/mbaas.env install-root/systemd/mbaas.env-template
+
+cd install-root
+
+tar czf ../install-bundle.tgz .
+
+cd ..
+rm -fr install-root
