@@ -3,18 +3,29 @@ package processing
 import (
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"html/template"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/ian-ross/morse-blinkies/mbaas/model"
 )
 
 // Make is the main driver function to run the Python blinky creation
 // code.
-func (bm *BlinkyMaker) Make(text string, tmpl *template.Template) (string, error) {
+func (bm *BlinkyMaker) Make(text string, rules *model.Rules,
+	tmpl *template.Template) (string, error) {
 	jobDir := path.Join(bm.WorkDir, "blinky-job")
 	projName := strings.ReplaceAll(strings.ToLower(text), " ", "-")
+	rulesBytes, err := json.Marshal(rules)
+	if err != nil {
+		return "", err
+	}
+	h := fnv.New32a()
+	h.Write(rulesBytes)
+	fullProjName := fmt.Sprintf("%s-%0x", projName, h.Sum32())
 
 	if err := os.RemoveAll(jobDir); err != nil {
 		return "", err
@@ -29,8 +40,17 @@ func (bm *BlinkyMaker) Make(text string, tmpl *template.Template) (string, error
 		[]string{"pro", "sch", "kicad_pcb"}); err != nil {
 		return "", err
 	}
+	rulesfp, err := os.Create("rules.json")
+	if err != nil {
+		return "", err
+	}
+	jsonRules, err := json.Marshal(rules)
+	if _, err := rulesfp.Write(jsonRules); err != nil {
+		return "", err
+	}
+	rulesfp.Close()
 
-	output, err := exec.Command("python", bm.Script, text).CombinedOutput()
+	output, err := exec.Command("python", bm.Script, text, "rules.json").CombinedOutput()
 	if err != nil {
 		return "", err
 	}
@@ -47,17 +67,17 @@ func (bm *BlinkyMaker) Make(text string, tmpl *template.Template) (string, error
 	if err != nil {
 		return "", err
 	}
-	defer logfp.Close()
 	if _, err := logfp.Write(output); err != nil {
 		return "", err
 	}
+	logfp.Close()
 
-	zipFile := path.Join(bm.OutputDir, projName+".zip")
+	zipFile := path.Join(bm.OutputDir, fullProjName+".zip")
 	if err := exec.Command("zip", "-r", zipFile, ".").Run(); err != nil {
 		return "", err
 	}
 
-	htmlfp, err := os.Create(path.Join(bm.OutputDir, projName+".html"))
+	htmlfp, err := os.Create(path.Join(bm.OutputDir, fullProjName+".html"))
 	if err != nil {
 		return "", err
 	}
@@ -70,14 +90,15 @@ func (bm *BlinkyMaker) Make(text string, tmpl *template.Template) (string, error
 	if err := dec.Decode(&info); err != nil {
 		return "", err
 	}
-	info["URL"] = "/output/" + projName + ".zip"
-	info["SparklineWidth"] = fmt.Sprintf("%d", 10*len(info["padded_sequence"].(string)))
+	info["URL"] = "/output/" + fullProjName + ".zip"
+	seqlen := len(info["padded_sequence"].([]interface{})[0].(string))
+	info["SparklineWidth"] = fmt.Sprintf("%d", 10*seqlen)
 
 	if err := tmpl.ExecuteTemplate(htmlfp, "output", info); err != nil {
 		return "", err
 	}
 
-	return "/output/" + projName + ".html", nil
+	return "/output/" + fullProjName + ".html", nil
 }
 
 func renames(in string, out string, types []string) error {

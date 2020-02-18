@@ -25,47 +25,51 @@ def make_board(text, rules):
     text = text.upper()
     info['text'] = text
     try:
-        seq = sequence.text_to_bit_sequence(text)
+        seqs = sequence.text_to_bit_sequence(text, rules['type'])
     except:
         logging.error('Error generating bit sequence', exc_info=sys.exc_info())
         return
-    seqs = sequence.to_string(seq)
-    print('Bit sequence:', seqs)
-    info['sequence'] = seqs
+    print('Bit sequence:')
+    info['sequence'] = []
+    for seq in seqs:
+        s = sequence.to_string(seq)
+        print(' ', s)
+        info['sequence'].append(s)
+    nseqs = len(seqs)
     print('')
 
     # Padding: either a fixed padding or to next power of two.
-    length = len(seq)
+    length = len(seqs[0])
     if length > 256:
         print('Sequence too long: maximum length is 256')
         sys.exit(1)
-    if 'explicit_padding' in rules:
-        print('Explicit padding not supported: must be power of 2!')
-        sys.exit(1)
-        length += rules['padding']
-    else:
-        length = util.next_power_of_two(length)
-    npadding = length - len(seq)
-    print('Length:', len(seq), '->', length)
+    length = util.next_power_of_two(length)
+    npadding = length - len(seqs[0])
+    print('Length:', len(seqs[0]), '->', length)
     for i in range(npadding):
-        seq.append(sequence.SPACE)
-    seqs = sequence.to_string(seq)
-    print('Padded bit sequence:', seqs)
-    info['padded_sequence'] = seqs
+        for j in range(nseqs):
+            seqs[j].append(sequence.SPACE)
+    print('Padded bit sequence:')
+    info['padded_sequence'] = []
+    for seq in seqs:
+        s = sequence.to_string(seq)
+        print(' ', s)
+        info['padded_sequence'].append(s)
     print('')
 
     # Convert to Espresso format.
     try:
-        esp = espresso.espresso(seq)
+        esp = espresso.espresso(seqs)
     except:
         logging.error('Error running Espresso', exc_info=sys.exc_info())
         return
 
     p = placement.place(esp, rules)
-    a = placement.assign(p['gates'], info)
+    print(p)
+    c, a = placement.assign(p['gates'], info)
     print('')
 
-    netlist.skidl_build(length, a, rules)
+    netlist.skidl_build(nseqs, length, c, a, rules)
     skidl.ERC()
     skidl.generate_netlist()
 

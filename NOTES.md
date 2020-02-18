@@ -55,3 +55,23 @@ Tasks:
 9. Web app front-end.
 10. Features: multi-LED, timing, etc.
 11. Queuing for backend jobs.
+
+
+
+
+Process:
+
+ - Hand calculation experiments
+ - Logisim simulations
+ - Start with single LED idea
+ - Morse code stuff: text -> bit sequence
+ - SKIDL experiments and framework
+ - Component selection: 74xx gates and counters
+ - Logic placement first pass
+ - Web app first pass
+ - Semi-working...
+ - Multi-LED idea: web app, logic placement, ...
+ - Oops.  Drive current for 5 LEDs is ca. 100 mA!  MOSFETs?
+ - Mouser has lots of MOSFETS: parametric selection => jellybean
+
+

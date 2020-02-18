@@ -10,3 +10,7 @@ main > .container {
   padding-right: 15px;
   padding-left: 15px;
 }
+
+select.led-group-select {
+  width: 4em;
+}

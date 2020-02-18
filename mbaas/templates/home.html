@@ -4,69 +4,188 @@
   <DIV class="alert alert-secondary" role="alert">
     Wondering what exactly this is?  <A href="/info/help.html">Help</A> is available...
   </DIV>
-  <DIV class="mt-5">
+  <DIV class="mt-4">
     <FORM action="/" method="post">
-      <DIV class="form-group row">
-        <LABEL for="blinky-text"><STRONG>Blinky text</STRONG></LABEL>
-        <INPUT type="text" id="blinky-text" name="blinky-text" class="form-control"
-               required autofocus/>
-        <SMALL id="blinky-text-help" class="form-text text-muted">
-          This is the text your blinky will flash in Morse code.
-        </SMALL>
-      </DIV>
-
-      <DIV class="form-group row mt-4 mb-0">
-        <LABEL><STRONG>Blinky type</STRONG></LABEL>
-      </DIV>
-
-      <DIV class="form-group mb-3">
-        <DIV class="form-check">
-          <INPUT class="form-check-input" type="radio" name="led-type"
-                 id="led-type-single" value="single" checked>
-          <LABEL class="form-check-label" for="led-type-single">
-            Single LED
-          </LABEL>
-        </DIV>
-        <DIV class="form-check">
-          <INPUT class="form-check-input" type="radio" name="led-type"
-                 id="led-type-multi" value="multi">
-          <LABEL class="form-check-label" for="led-type-multi">
-            One LED group per letter
-          </LABEL>
+      <DIV class="form-row">
+        <DIV class="form-group col">
+          <LABEL for="blinky-text"><STRONG>Blinky text</STRONG></LABEL>
+          <INPUT type="text" id="blinky-text" name="blinky-text" class="form-control"
+                 required autofocus/>
+          <SMALL id="blinky-text-help" class="form-text text-muted">
+            This is the text your blinky will flash in Morse code.
+            Only letters and spaces are allowed here.
+          </SMALL>
         </DIV>
       </DIV>
 
-      <DIV class="form-group row mt-4">
-        <LABEL for="blinky-text"><STRONG>LED group sizes</STRONG></LABEL>
-        <INPUT type="text" id="led-groups" name="led-groups" class="form-control" disabled/>
-        <SMALL id="led-groups-help" class="form-text text-muted">
-          Comma-separated list of LED group sizes, e.g. "3,3,3" (only if using LED groups).
-        </SMALL>
+      <DIV class="form-row">
+        <DIV class="form-group col-md-3">
+          <LABEL for="blink-rate"><STRONG>Blink rate</STRONG></LABEL>
+          <SELECT class="form-control" id="blink-rate" name="blink-rate">
+            <OPTION value="125">125 ms</OPTION>
+            <OPTION value="250">250 ms</OPTION>
+            <OPTION value="500" selected>500 ms</OPTION>
+            <OPTION value="750">750 ms</OPTION>
+          </SELECT>
+          <SMALL id="blink-rate-help" class="form-text text-muted">
+            Length of a Morse code dot in milliseconds.
+          </SMALL>
+        </DIV>
       </DIV>
 
-      <DIV class="form-group row mt-4">
-        <LABEL for="blink-rate"><STRONG>Blink rate</STRONG></LABEL>
-        <SELECT class="form-control" id="blink-rate" name="blink-rate">
-          <OPTION value="125">125 ms</OPTION>
-          <OPTION value="250">250 ms</OPTION>
-          <OPTION value="500" selected>500 ms</OPTION>
-          <OPTION value="750">750 ms</OPTION>
-        </SELECT>
-        <SMALL id="led-groups-help" class="form-text text-muted">
-          Length of a Morse code dot in milliseconds.
-        </SMALL>
+      <DIV class="form-row">
+        <DIV class="form-group">
+          <LABEL><STRONG>Blinky type</STRONG></LABEL>
+          <DIV class="form-check">
+            <INPUT class="form-check-input" type="radio" name="led-type"
+                   id="led-type-single" value="single" checked>
+            <LABEL class="form-check-label" for="led-type-single">
+              Single LED
+            </LABEL>
+          </DIV>
+          <DIV class="form-check">
+            <INPUT class="form-check-input" type="radio" name="led-type"
+                   id="led-type-group" value="group">
+            <LABEL class="form-check-label" for="led-type-group">
+              Single LED group
+            </LABEL>
+          </DIV>
+          <DIV class="form-check">
+            <INPUT class="form-check-input" type="radio" name="led-type"
+                   id="led-type-multi" value="multi">
+            <LABEL class="form-check-label" for="led-type-multi">
+              One LED group per letter
+            </LABEL>
+          </DIV>
+          <SMALL id="led-type-help" class="form-text text-muted">
+            You can make a blinky with either a single LED, a group of
+            LEDs that all blink for every eltter, or one with one group
+            of LEDs per letter in your text (so that each group blinks
+            for only a single letter).
+          </SMALL>
+        </DIV>
       </DIV>
 
-      <DIV class="form-group row mt-4">
+      <DIV class="form-row">
+        <DIV class="form-group">
+          <LABEL for="led-count"><STRONG>Single LED group size</STRONG></LABEL>
+          <SELECT class="form-control led-group-select" id="led-count" name="led-count" disabled>
+            <OPTION value="1" selected>1</OPTION>
+            <OPTION value="2">2</OPTION>
+            <OPTION value="3">3</OPTION>
+            <OPTION value="4">4</OPTION>
+            <OPTION value="5">5</OPTION>
+            <OPTION value="6">6</OPTION>
+            <OPTION value="7">7</OPTION>
+            <OPTION value="8">8</OPTION>
+            <OPTION value="9">9</OPTION>
+            <OPTION value="10">10</OPTION>
+          </SELECT>
+          <SMALL id="led-count-help" class="form-text text-muted">
+            This is the number of LEDs to use if you want multiple LEDs
+            all flashing for every letter.
+          </SMALL>
+        </DIV>
+      </DIV>
+
+      <DIV class="form-row">
+        <DIV class="form-group">
+          <LABEL><STRONG>Multiple LED group sizes</STRONG></LABEL>
+
+          <DIV id="led-groups" class="form-group row ml-0">
+          </DIV>
+          <SMALL id="led-groups-help" class="form-text text-muted mt-0">
+            This is the number of LEDs to use for each letter if you
+            want multiple groups of LEDs, one group blinking per
+            letter.
+          </SMALL>
+        </DIV>
+      </DIV>
+
+      <DIV class="form-row">
+        <DIV class="form-group">
+          <LABEL><STRONG>MOSFET drivers</STRONG></LABEL>
+          <DIV class="form-check">
+            <INPUT class="form-check-input" type="checkbox" name="mosfet-drivers"
+                   id="mosfet-drivers">
+            <LABEL class="form-check-label" for="mosfet-drivers">
+              Include MOSFET LED driver transistors?
+            </LABEL>
+          </DIV>
+          <SMALL id="mosfet-drivers-help" class="form-text text-muted">
+            The LEDs in your blinky will be driven from the outputs of
+            74HCxx logic gates. If you're driving a single LED, that's
+            OK, but if you're driving multiple LEDs (either one group
+            in total, or one group per letter), you'll probably want
+            MOSFETs between the gate outputs and the LEDs!
+          </SMALL>
+        </DIV>
+      </DIV>
+
+      <DIV class="form-row mt-3">
         <BUTTON type="submit" class="btn btn-primary">
           Make my blinky!
         </BUTTON>
       </DIV>
-      <DIV class="row mt-0">
+      <DIV class="form-row mt-2 mb-5">
         <A href="/advanced">Advanced version</A>
       </DIV>
     </FORM>
   </DIV>
 </DIV>
+<SCRIPT>
+  function led_count(i, disable) {
+    var name = 'led-count-' + i;
+    var disabled = disable ? ' disabled' : '';
+    return '<SELECT class="form-control led-group-select mr-1" id="' +
+           name + '" name="' + name + '"' + disabled + '>' +
+           '<OPTION value="1" selected>1</OPTION>' +
+           '<OPTION value="2">2</OPTION>' +
+           '<OPTION value="3">3</OPTION>' +
+           '<OPTION value="4">4</OPTION>' +
+           '<OPTION value="5">5</OPTION>' +
+           '</SELECT>';
+  }
+
+  $(document).ready(function() {
+    $('input[name=blinky-text]').keydown(function(e) {
+      if (e.defaultPrevented) return;
+      const key = e.key || e.code;
+      if (e.key.length <= 1 && !(e.metaKey || e.ctrlKey || e.altKey)) {
+        if (!((key >= 'a' && key <= 'z') || (key >= 'A' && key <= 'Z') || key === ' ')) {
+          if (e.preventDefault)
+            e.preventDefault();
+          else
+            e.returnValue = false;
+        }
+      }
+    });
+
+    $('input[name=blinky-text]').on('input', function() {
+      var len = this.value.replace(/ /g, '').length;
+      var groups = $('#led-groups');
+      var ngroups = groups.children().length;
+      if (ngroups > len) {
+        var to_remove = ngroups - len;
+        for (var i = 0; i < to_remove; ++i) {
+          groups.children().last().remove();
+        }
+      } else if (ngroups < len) {
+        var to_add = len - ngroups;
+        var new_idx = ngroups + 1;
+        var disable = !$('input[type=radio][name=led-type]')[2].checked;
+        for (var i = 0; i < to_add; ++i) {
+          groups.append(led_count(new_idx, disable));
+          new_idx += 1;
+        }
+      }
+    });
+
+    $('input[type=radio][name=led-type]').change(function() {
+      $('#led-groups select').prop('disabled', this.value != 'multi');
+      $('#led-count').prop('disabled', this.value != 'group');
+    });
+  });
+</SCRIPT>
 {{template "footer"}}
 {{end}}

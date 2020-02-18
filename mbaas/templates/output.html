@@ -14,10 +14,14 @@
           <TD>Text</TD>
           <TD>{{.text}}</TD>
         </TR>
+        {{with $info := .}}
+        {{range $idx, $val := $info.padded_sequence}}
         <TR>
-          <TD>Sequence</TD>
-          <TD><EMBED src="/assets/sparkline.svg?{{.padded_sequence}}" type="image/svg+xml" width={{.SparklineWidth}} height=15></TD>
+          <TD>{{if eq $idx 0}}Sequence{{end}}</TD>
+          <TD><EMBED src="/sparkline?{{$val}}" type="image/svg+xml" width={{$info.SparklineWidth}} height=15></TD>
         </TR>
+        {{end}}
+        {{end}}
       </TBODY>
     </TABLE>
 

@@ -6,16 +6,17 @@ type BlinkyType string
 
 // Allowed values for the blinky type field.
 const (
-	SingleLED BlinkyType = "single"
-	MultiLED  BlinkyType = "multi"
+	SingleLED         BlinkyType = "single"
+	SingleLEDGroup    BlinkyType = "group"
+	LEDGroupPerLetter BlinkyType = "multi"
 )
 
-// Job represents a single blinky creation job.
-type Job struct {
-	Text              string     `json:"text"`
+// Rules represents a single blinky creation job.
+type Rules struct {
 	Type              BlinkyType `json:"type"`
 	LEDForwardVoltage float32    `json:"led_forward_voltage_V"`
 	LEDForwardCurrent float32    `json:"led_forward_current_mA"`
 	LEDGroups         []int      `json:"led_groups",omitempty`
 	BlinkRate         int        `json:"blink_rate_ms"`
+	MOSFETDrivers     bool       `json:"mosfet_drivers"`
 }

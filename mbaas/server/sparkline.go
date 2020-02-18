@@ -1,4 +1,8 @@
-<svg version="1.1"
+package server
+
+import "net/http"
+
+const script = `<svg version="1.1"
      baseProfile="full"
      xmlns="http://www.w3.org/2000/svg"
      xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -43,4 +47,9 @@
         }
     }
   ]]></script>
-</svg>
+</svg>`
+
+func (s *Server) sparkline(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Write([]byte(script))
+}

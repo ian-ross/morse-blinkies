@@ -1,8 +1,6 @@
-# Remember:
-#
-# export KICAD_SYMBOL_DIR=/usr/share/kicad/library
-
 from skidl import *
+from UliEngineering.Electronics.Resistors import *
+
 
 # LIBRARIES, FOOTPRINTS, TEMPLATES
 
@@ -16,7 +14,8 @@ fp = {
     'BATTERY': 'morse-blinky:BatteryHolder_LINK_BAT-HLD-001-SMT',
     'SOIC-8': 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm',
     'SOIC-14': 'Package_SO:SOIC-14_3.9x8.7mm_P1.27mm',
-    'SOIC-16': 'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm'
+    'SOIC-16': 'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm',
+    'MOSFET': 'Package_TO_SOT_SMD:SOT-23',
 }
 
 units = {
@@ -31,12 +30,13 @@ r = Part('Device', 'R', TEMPLATE, footprint=fp['R'])
 c = Part('Device', 'C', TEMPLATE, footprint=fp['C'])
 
 
-def skidl_build(length, gates, rules):
+def skidl_build(nleds, length, connects, gates, rules):
     vdd, gnd = power()
     osc = oscillator(vdd, gnd, rules['blink_rate_ms'])
     nets, bit_names = counters(vdd, gnd, osc, length)
-    out = logic(vdd, gnd, gates, nets)
-    blinky(vdd, gnd, out)
+    connect(nets, connects)
+    out = logic(nleds, vdd, gnd, gates, nets)
+    blinkies(vdd, gnd, out, rules)
 
 
 # POWER
@@ -164,7 +164,16 @@ def counters(vdd, gnd, osc, length):
     return bits, bit_names
 
 
-def logic(vdd, gnd, gates, nets):
+def connect(nets, connects):
+    for c in connects:
+        if c[0] not in nets:
+            nets[c[0]] = Net()
+        if c[1] not in nets:
+            nets[c[1]] = Net()
+        nets[c[0]] += nets[c[1]]
+
+
+def logic(nleds, vdd, gnd, gates, nets):
     print('SKIDL: logic')
     parts_with_gates = []
     for chip in gates:
@@ -224,7 +233,8 @@ def logic(vdd, gnd, gates, nets):
                     else:
                         nets[in_nets[i]] += part[in_pins[i]]
                     print('  ', in_nets[i], '->', chip, part.ref, in_pins[i])
-                nets[out_net] = Net()
+                if out_net not in nets:
+                    nets[out_net] = Net()
                 nets[out_net] += part[out_pin]
                 print('  ', out_net, '->', chip, part.ref, out_pin)
 
@@ -238,16 +248,55 @@ def logic(vdd, gnd, gates, nets):
         print(parts_with_gates)
         sys.exit(1)
 
-    return nets['output']
+    outputs = []
+    for i in range(nleds):
+        outputs.append(nets['output' + str(i + 1)])
+    return outputs
 
 
 # BLINKY
 
-def blinky(vdd, gnd, output):
+def blinkies(vdd, gnd, outputs, rules):
     print('SKIDL: blinky')
-    r_led = r(value='1K')
-    led = Part('Device', 'LED', footprint=fp['LED'])
-    led['K'] += r_led[1]
-    r_led[2] += gnd
+    iout = 0
+    ismulti = rules['type'] == 'multi'
 
-    led['A'] += output
+    vfwd = rules['led_forward_voltage_V']
+    vr = 3.3 - vfwd
+    ifwd = rules['led_forward_current_mA'] * 1.0E-3
+
+    for output in outputs:
+        led_anode_net = output
+        led_cathode_net = gnd
+        if rules['mosfet_drivers']:
+            mosfet = Part('Transistor_FET', '2N7002', footprint=fp['MOSFET'])
+            led_cathode_net = mosfet['D']
+            led_anode_net = vdd
+            mosfet['S'] += gnd
+            mosfet['G'] += output
+            r_bleed = r(value='1M')
+            output += r_bleed[1]
+            gnd += r_bleed[2]
+
+        nleds = 1
+        if rules['type'] == 'multi':
+            nleds = rules['led_groups'][iout]
+        if rules['type'] == 'group':
+            nleds = rules['led_groups'][0]
+        iout += 1
+
+        rval = nearest_resistor(vr / (nleds * ifwd), sequence=e12)
+        print('nleds =', nleds, '   rval =', rval)
+        r_led = r(value=format_r(rval))
+        r_led[2] += led_cathode_net
+
+        for i in range(nleds):
+            led = Part('Device', 'LED', footprint=fp['LED'])
+            led['K'] += r_led[1]
+            led['A'] += led_anode_net
+
+def format_r(rval):
+    if rval < 1000:
+        return str(int(rval))
+    else:
+        return str(rval / 1000) + 'K'

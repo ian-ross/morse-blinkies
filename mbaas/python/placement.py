@@ -3,17 +3,19 @@ from espresso import DONTCARE, POS, NEG
 NOT = 0
 AND = 1
 OR = 2
+CONNECT = 3
 
 # Gates are represented as [<type>, [<input nets>], <output net>]
 
 net_idx = 0
 andint_net_idx = 0
+orint_net_idx = 0
 net_names = {}
 gates = []
 pos_nets = {}
 neg_nets = {}
 
-def place(exp, rules):
+def place(exps, rules):
     global net_idx
     global net_names
     global gates
@@ -21,7 +23,7 @@ def place(exp, rules):
     global neg_nets
 
     # Assign net names to inputs (a, b, c, ... starting at LSB).
-    ninputs = len(exp[0])
+    ninputs = len(exps[0][0])
     for i in range(ninputs):
         n = input_name(i)
         net_names[n] = net_idx
@@ -31,10 +33,11 @@ def place(exp, rules):
     # Identify variable positions with negations (to size number of
     # inverters).
     negs = {}
-    for term in exp:
-        for i in range(ninputs):
-            if term[i] == NEG:
-                negs[i] = True
+    for exp in exps:
+        for term in exp:
+            for i in range(ninputs):
+                if term[i] == NEG:
+                    negs[i] = True
 
     # Generate inverter gates and assign net names to negated inputs
     # (~a, ~b, ~c, ... starting at LSB).
@@ -49,39 +52,46 @@ def place(exp, rules):
     # Process terms.
     and_idx = 1
     and_nets = []
-    for term in exp:
-        # Use appropriate strategy to evaluate AND using only 4-, 3-,
-        # or 2-input gates.
-        out_net = 'and' + str(and_idx)
-        and_nets.append(out_net)
-        and_idx += 1
+    out_idx = 1
+    out_nets = []
+    for exp in exps:
+        for term in exp:
+            # Use appropriate strategy to evaluate AND using only 4-,
+            # 3-, or 2-input gates.
+            out_net = 'and' + str(and_idx)
+            and_nets.append(out_net)
+            and_idx += 1
+            net_names[out_net] = net_idx
+            net_idx += 1
+            make_and(term, out_net)
+
+        out_net = 'output' + str(out_idx)
+        out_nets.append(out_net)
+        out_idx += 1
         net_names[out_net] = net_idx
         net_idx += 1
-        make_and(term, out_net)
-
-    out_net = 'output'
-    net_names[out_net] = net_idx
-    net_idx += 1
-    make_or_tree(and_nets, out_net)
+        make_or_tree(and_nets, out_net)
 
     return dict(nets=net_names, gates=gates)
 
 
 def make_or_tree(in_nets, out_net):
     global net_idx
+    global orint_net_idx
     global net_names
     global gates
-
-    int_net_idx = 1
-    while len(in_nets) > 2:
-        int_net = 'orint' + str(int_net_idx)
-        int_net_idx += 1
-        net_names[int_net] = net_idx
-        net_idx += 1
-        gates.append([OR, [in_nets[0], in_nets[1]], int_net])
-        in_nets = in_nets[2:]
-        in_nets.append(int_net)
-    gates.append([OR, [in_nets[0], in_nets[1]], out_net])
+    if len(in_nets) == 1:
+        gates.append([CONNECT, in_nets[0], out_net])
+    else:
+        while len(in_nets) > 2:
+            orint_net_idx += 1
+            int_net = 'orint' + str(orint_net_idx)
+            net_names[int_net] = net_idx
+            net_idx += 1
+            gates.append([OR, [in_nets[0], in_nets[1]], int_net])
+            in_nets = in_nets[2:]
+            in_nets.append(int_net)
+        gates.append([OR, [in_nets[0], in_nets[1]], out_net])
 
 def make_and(term, out_net):
     global net_idx
@@ -141,6 +151,7 @@ def assign(gates, info):
     and3_gates = [g for g in gates if g[0] == AND and len(g[1]) == 3]
     and4_gates = [g for g in gates if g[0] == AND and len(g[1]) == 4]
     or_gates = [g for g in gates if g[0] == OR]
+    connects = [[g[1], g[2]] for g in gates if g[0] == CONNECT]
 
     chips_7404, dum = alloc_div('74HC04', not_gates, 6)
     chips_7432, dum = alloc_div('74HC32', or_gates, 4)
@@ -170,7 +181,7 @@ def assign(gates, info):
         gate_info['7432 quad 2-input OR'] = len(chips_7432)
     info['chips'] = gate_info
 
-    return chips_7404 + chips_7432 + chips_7408 + chips_7411 + chips_7421
+    return connects, chips_7404 + chips_7432 + chips_7408 + chips_7411 + chips_7421
 
 
 def alloc_div(chip, gates, per_chip):
