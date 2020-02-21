@@ -22,14 +22,26 @@
         <DIV class="form-group col-md-3">
           <LABEL for="blink-rate"><STRONG>Blink rate</STRONG></LABEL>
           <SELECT class="form-control" id="blink-rate" name="blink-rate">
+            <OPTION value="100">100 ms</OPTION>
             <OPTION value="125">125 ms</OPTION>
-            <OPTION value="250">250 ms</OPTION>
-            <OPTION value="500" selected>500 ms</OPTION>
-            <OPTION value="750">750 ms</OPTION>
+            <OPTION value="150">150 ms</OPTION>
+            <OPTION value="200">200 ms</OPTION>
+            <OPTION value="250" selected>250 ms</OPTION>
+            <OPTION value="300">300 ms</OPTION>
+            <OPTION value="350">350 ms</OPTION>
+            <OPTION value="400">400 ms</OPTION>
+            <OPTION value="450">450 ms</OPTION>
+            <OPTION value="500">500 ms</OPTION>
           </SELECT>
           <SMALL id="blink-rate-help" class="form-text text-muted">
             Length of a Morse code dot in milliseconds.
           </SMALL>
+        </DIV>
+        <DIV class="blinky" id="blinky">
+          <SVG viewBox="0 0 5 5" xmlns="http://www.w3.org/2000/svg">
+            <CIRCLE cx="2.5" cy="2.5" r="2" stroke="#000" stroke-width="0.5" fill="none"/>
+            <CIRCLE id="led" cx="2.5" cy="2.5" r="1.75" fill="#00aa00"/>
+          </SVG>
         </DIV>
       </DIV>
 
@@ -184,6 +196,33 @@
     $('input[type=radio][name=led-type]').change(function() {
       $('#led-groups select').prop('disabled', this.value != 'multi');
       $('#led-count').prop('disabled', this.value != 'group');
+    });
+
+    // "HELLO"
+    var sequence = [
+      1, 0, 1, 0, 1, 0, 1, 0, 0, 0,
+      1, 0, 0, 0,
+      1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0,
+      1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0,
+      1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0,
+      0, 0, 0, 0, 0, 0
+    ];
+    var seqlen = sequence.length;
+    var iblink = 0;
+    var delay = 250;
+
+    function step() {
+      if (sequence[iblink] === 1)
+        $('#led').attr('fill', '#00aa00');
+      else
+        $('#led').attr('fill', 'none');
+      iblink = (iblink + 1) % seqlen;
+      setTimeout(step, delay);
+    }
+    step();
+
+    $('#blink-rate').change(function() {
+      delay = $('#blink-rate').val();
     });
   });
 </SCRIPT>

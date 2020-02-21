@@ -67,12 +67,37 @@ def oscillator(vdd, gnd, blink_rate_ms):
     c_ctrl = c(value='100n')
     c_ctrl[1, 2] += osc['CTRL'], gnd
 
-    r_trig = r(value='470K')
+    # Using the standard layout for a 555 astable with:
+    #
+    #  - THRESH and TRIG tied together,
+    #  - a resistor Rdis from DIS to VDD,
+    #  - a resistor Rtrig between DIS and THRESH/TRIG,
+    #  - a capacitor Ctrig between THRESH/TRIG and GND,
+    #
+    # the signal low and high times are:
+    #
+    #  Tlow = 0.693 Rtrig Ctrig
+    #  Thigh = 0.693 (Rtrig + Rdis) Ctrig
+    #
+    # Setting Rtrig = Rdis = R gives a duty cycle of 2/3, which is
+    # fine for our application since we only care about the rising
+    # edge that we're using to clock the counter, and the total period
+    # T is then:
+    #
+    #  T = Tlow + Thigh = 0.693 Ctrig (Rdis + 2 Rtrig) = 0.693 Ctrig (3 R)
+    #
+    # Setting Ctrig = 1uF, we get:
+    #
+    #  T = 2.079E-6 R  or  T/ms = 2.079 R/kΩ
     c_trig = c(value='1U')
+    rval = nearest_resistor(blink_rate_ms / 2.079 * 1.0E3, sequence=e12)
+    r_dis = r(value=format_r(rval))
+    r_trig = r(value=format_r(rval))
 
     c_trig[1] += gnd
     c_trig[2] += r_trig[1], osc['THRESH'], osc['TRIG']
-    r_trig[2] += osc['OUT']
+    r_trig[2] += r_dis[1], osc['DIS']
+    r_dis[2] += vdd
 
     return osc['OUT']
 
@@ -299,4 +324,4 @@ def format_r(rval):
     if rval < 1000:
         return str(int(rval))
     else:
-        return str(rval / 1000) + 'K'
+        return str(int(rval / 1000)) + 'K'
