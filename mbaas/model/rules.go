@@ -13,10 +13,11 @@ const (
 
 // Rules represents a single blinky creation job.
 type Rules struct {
-	Type              BlinkyType `json:"type"`
-	LEDForwardVoltage float32    `json:"led_forward_voltage_V"`
-	LEDForwardCurrent float32    `json:"led_forward_current_mA"`
-	LEDGroups         []int      `json:"led_groups",omitempty`
-	BlinkRate         int        `json:"blink_rate_ms"`
-	TransistorDrivers bool       `json:"transistor_drivers"`
+	Type              BlinkyType        `json:"type"`
+	LEDForwardVoltage float32           `json:"led_forward_voltage_V"`
+	LEDForwardCurrent float32           `json:"led_forward_current_mA"`
+	LEDGroups         []int             `json:"led_groups",omitempty`
+	BlinkRate         int               `json:"blink_rate_ms"`
+	TransistorDrivers bool              `json:"transistor_drivers"`
+	Footprints        map[string]string `json:"footprints"`
 }

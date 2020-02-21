@@ -7,17 +7,6 @@ from UliEngineering.Electronics.Resistors import *
 lib_search_paths[KICAD].append('../libraries')
 lib = 'morse-blinky'
 
-fp = {
-    'R': 'Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder',
-    'C': 'Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder',
-    'LED': 'LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder',
-    'BATTERY': 'morse-blinky:BatteryHolder_LINK_BAT-HLD-001-SMT',
-    'SOIC-8': 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm',
-    'SOIC-14': 'Package_SO:SOIC-14_3.9x8.7mm_P1.27mm',
-    'SOIC-16': 'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm',
-    'BJT':     'Package_TO_SOT_SMD:SOT-23_Handsoldering',
-}
-
 units = {
     '74HC04': 6,
     '74HC08': 4,
@@ -26,22 +15,25 @@ units = {
     '74HC32': 4
 }
 
-r = Part('Device', 'R', TEMPLATE, footprint=fp['R'])
-c = Part('Device', 'C', TEMPLATE, footprint=fp['C'])
 
 
 def skidl_build(nleds, length, connects, gates, rules):
-    vdd, gnd = power()
-    osc = oscillator(vdd, gnd, rules['blink_rate_ms'])
-    nets, bit_names = counters(vdd, gnd, osc, length)
+    fp = rules['footprints']
+
+    r = Part('Device', 'R', TEMPLATE, footprint=fp['R'])
+    c = Part('Device', 'C', TEMPLATE, footprint=fp['C'])
+
+    vdd, gnd = power(fp)
+    osc = oscillator(vdd, gnd, rules['blink_rate_ms'], fp, r, c)
+    nets, bit_names = counters(vdd, gnd, osc, length, fp)
     connect(nets, connects)
-    out = logic(nleds, vdd, gnd, gates, nets)
-    blinkies(vdd, gnd, out, rules)
+    out = logic(nleds, vdd, gnd, gates, nets, fp)
+    blinkies(vdd, gnd, out, rules, fp, r)
 
 
 # POWER
 
-def power():
+def power(fp):
     print('SKIDL: power')
     vdd, gnd = Net('VDD'), Net('GND')
     vdd.drive = POWER
@@ -56,7 +48,7 @@ def power():
 # 555 ASTABLE
 
 # TODO: PARAMETERISE OSCILLATOR RATE
-def oscillator(vdd, gnd, blink_rate_ms):
+def oscillator(vdd, gnd, blink_rate_ms, fp, r, c):
     print('SKIDL: oscillator')
     osc = Part(lib, '7555', footprint=fp['SOIC-8'])
     osc['VDD'] += vdd
@@ -109,7 +101,7 @@ def oscillator(vdd, gnd, blink_rate_ms):
 #  * IF LENGTH <= 16, USE ONE TIMER, ELSE USE TWO.
 #  * TIMER RESET
 
-def counters(vdd, gnd, osc, length):
+def counters(vdd, gnd, osc, length, fp):
     print('SKIDL: counters')
     counter_lo = Part(lib, '74HC193', footprint=fp['SOIC-16'])
     vdd += counter_lo['VCC']
@@ -198,7 +190,7 @@ def connect(nets, connects):
         nets[c[0]] += nets[c[1]]
 
 
-def logic(nleds, vdd, gnd, gates, nets):
+def logic(nleds, vdd, gnd, gates, nets, fp):
     print('SKIDL: logic')
     parts_with_gates = []
     for chip in gates:
@@ -281,7 +273,7 @@ def logic(nleds, vdd, gnd, gates, nets):
 
 # BLINKY
 
-def blinkies(vdd, gnd, outputs, rules):
+def blinkies(vdd, gnd, outputs, rules, fp, r):
     print('SKIDL: blinky')
     iout = 0
     ismulti = rules['type'] == 'multi'

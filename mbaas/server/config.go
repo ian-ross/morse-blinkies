@@ -23,6 +23,9 @@ type Config struct {
 	// pages are stored.
 	OutputDir string `env:"OUTDIR"`
 
+	// Library directory containing default rules file.
+	LibDir string `env:"LIBDIR"`
+
 	// TemplateDir is the directory holding the blinky project template.
 	TemplateDir string `env:"TEMPLATEDIR"`
 }

@@ -23,22 +23,24 @@ func (s *Server) newJob(w http.ResponseWriter, r *http.Request) {
 		s.tmpl.ExecuteTemplate(w, "error", "Couldn't parse form response!")
 		return
 	}
-	fmt.Println(r.Form)
 
 	text := r.FormValue("blinky-text")
 	var rules *model.Rules
-	ruleText := r.FormValue("rules")
+	ruleText := r.FormValue("blinky-rules")
 	if ruleText == "" {
 		var err error
-		rules, err = rulesFromForm(r)
+		rules, err = rulesFromForm(r, s.baseRules)
 		if err != nil {
 			s.tmpl.ExecuteTemplate(w, "error", err.Error())
 			return
 		}
 	} else {
-		if err := json.Unmarshal([]byte(ruleText), rules); err != nil {
+		inRules := model.Rules{}
+		if err := json.Unmarshal([]byte(ruleText), &inRules); err != nil {
+			print(err)
 			s.tmpl.ExecuteTemplate(w, "error", "Couldn't parse rules text!")
 		}
+		rules = &inRules
 	}
 
 	htmlURLOrError, err := s.bm.Make(text, rules, s.tmpl)
@@ -60,7 +62,7 @@ func (s *Server) pendingJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func rulesFromForm(r *http.Request) (*model.Rules, error) {
+func rulesFromForm(r *http.Request, baseRules *model.Rules) (*model.Rules, error) {
 	ledType := r.FormValue("led-type")
 	ledGroups := []int{}
 	switch ledType {
@@ -89,6 +91,12 @@ func rulesFromForm(r *http.Request) (*model.Rules, error) {
 			return nil, errors.New("invalid LED group size")
 		}
 		ledGroups = append(ledGroups, cnt)
+
+	case "single":
+		// OK
+
+	default:
+		return nil, errors.New("invalid blinky type field")
 	}
 
 	blinkRate, err := strconv.Atoi(r.FormValue("blink-rate"))
@@ -103,10 +111,11 @@ func rulesFromForm(r *http.Request) (*model.Rules, error) {
 
 	return &model.Rules{
 		Type:              model.BlinkyType(ledType),
-		LEDForwardVoltage: 2.2,
-		LEDForwardCurrent: 20.0,
+		LEDForwardVoltage: baseRules.LEDForwardVoltage,
+		LEDForwardCurrent: baseRules.LEDForwardCurrent,
 		LEDGroups:         ledGroups,
 		BlinkRate:         blinkRate,
 		TransistorDrivers: transistors,
+		Footprints:        baseRules.Footprints,
 	}, nil
 }

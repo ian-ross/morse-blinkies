@@ -1,6 +1,7 @@
 package processing
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"hash/fnv"
@@ -19,12 +20,15 @@ func (bm *BlinkyMaker) Make(text string, rules *model.Rules,
 	tmpl *template.Template) (string, error) {
 	jobDir := path.Join(bm.WorkDir, "blinky-job")
 	projName := strings.ReplaceAll(strings.ToLower(text), " ", "-")
-	rulesBytes, err := json.Marshal(rules)
+	unformattedJSONRules, err := json.Marshal(rules)
 	if err != nil {
 		return "", err
 	}
+	var out bytes.Buffer
+	json.Indent(&out, unformattedJSONRules, "", "  ")
+	jsonRules := out.Bytes()
 	h := fnv.New32a()
-	h.Write(rulesBytes)
+	h.Write(jsonRules)
 	fullProjName := fmt.Sprintf("%s-%0x", projName, h.Sum32())
 
 	if err := os.RemoveAll(jobDir); err != nil {
@@ -44,7 +48,6 @@ func (bm *BlinkyMaker) Make(text string, rules *model.Rules,
 	if err != nil {
 		return "", err
 	}
-	jsonRules, err := json.Marshal(rules)
 	if _, err := rulesfp.Write(jsonRules); err != nil {
 		return "", err
 	}
