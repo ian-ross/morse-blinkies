@@ -15,7 +15,7 @@ fp = {
     'SOIC-8': 'Package_SO:SOIC-8_3.9x4.9mm_P1.27mm',
     'SOIC-14': 'Package_SO:SOIC-14_3.9x8.7mm_P1.27mm',
     'SOIC-16': 'Package_SO:SOIC-16_3.9x9.9mm_P1.27mm',
-    'MOSFET': 'Package_TO_SOT_SMD:SOT-23',
+    'BJT':     'Package_TO_SOT_SMD:SOT-23_Handsoldering',
 }
 
 units = {
@@ -291,28 +291,28 @@ def blinkies(vdd, gnd, outputs, rules):
     ifwd = rules['led_forward_current_mA'] * 1.0E-3
 
     for output in outputs:
-        led_anode_net = output
-        led_cathode_net = gnd
-        if rules['mosfet_drivers']:
-            mosfet = Part('Transistor_FET', '2N7002', footprint=fp['MOSFET'])
-            led_cathode_net = mosfet['D']
-            led_anode_net = vdd
-            mosfet['S'] += gnd
-            mosfet['G'] += output
-            r_bleed = r(value='1M')
-            output += r_bleed[1]
-            gnd += r_bleed[2]
-
         nleds = 1
         if rules['type'] == 'multi':
             nleds = rules['led_groups'][iout]
         if rules['type'] == 'group':
             nleds = rules['led_groups'][0]
         iout += 1
+        ileds = ifwd * nleds
+        r_led = r(value=format_r(nearest_resistor(vr / ileds, sequence=e12)))
 
-        rval = nearest_resistor(vr / (nleds * ifwd), sequence=e12)
-        print('nleds =', nleds, '   rval =', rval)
-        r_led = r(value=format_r(rval))
+        led_anode_net = output
+        led_cathode_net = gnd
+
+        if rules['transistor_drivers']:
+            bjt = Part('Transistor_BJT', 'MMBT3904', footprint=fp['BJT'])
+            led_cathode_net = bjt['C']
+            led_anode_net = vdd
+            bjt['E'] += gnd
+            ib = ileds / 100.0 # Assume transistor beta = 100
+            r_base = r(value=format_r(nearest_resistor((3.3 - 0.7) / ib, sequence=e12)))
+            bjt['B'] += r_base[1]
+            r_base[2] += output
+
         r_led[2] += led_cathode_net
 
         for i in range(nleds):
@@ -324,4 +324,7 @@ def format_r(rval):
     if rval < 1000:
         return str(int(rval))
     else:
-        return str(int(rval / 1000)) + 'K'
+        rval = int(rval / 100) / 10
+        if rval == int(rval):
+            rval = int(rval)
+        return str(rval) + 'K'

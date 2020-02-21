@@ -41,13 +41,17 @@ func (s *Server) newJob(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	htmlURL, err := s.bm.Make(text, rules, s.tmpl)
+	htmlURLOrError, err := s.bm.Make(text, rules, s.tmpl)
 	if err != nil {
-		s.tmpl.ExecuteTemplate(w, "error", err.Error())
+		msg := err.Error()
+		if htmlURLOrError != "" {
+			msg = htmlURLOrError
+		}
+		s.tmpl.ExecuteTemplate(w, "error", msg)
 		return
 	}
 
-	http.Redirect(w, r, htmlURL, http.StatusFound)
+	http.Redirect(w, r, htmlURLOrError, http.StatusFound)
 	// jobID := 1
 	// s.tmpl.ExecuteTemplate(w, "pending", jobID)
 }
@@ -92,9 +96,9 @@ func rulesFromForm(r *http.Request) (*model.Rules, error) {
 		return nil, errors.New("invalid blink rate value")
 	}
 
-	mosfets := false
-	if r.FormValue("mosfet-drivers") == "on" {
-		mosfets = true
+	transistors := false
+	if r.FormValue("transistor-drivers") == "on" {
+		transistors = true
 	}
 
 	return &model.Rules{
@@ -103,6 +107,6 @@ func rulesFromForm(r *http.Request) (*model.Rules, error) {
 		LEDForwardCurrent: 20.0,
 		LEDGroups:         ledGroups,
 		BlinkRate:         blinkRate,
-		MOSFETDrivers:     mosfets,
+		TransistorDrivers: transistors,
 	}, nil
 }

@@ -116,20 +116,24 @@
 
       <DIV class="form-row">
         <DIV class="form-group">
-          <LABEL><STRONG>MOSFET drivers</STRONG></LABEL>
+          <LABEL><STRONG>Transistor drivers</STRONG></LABEL>
           <DIV class="form-check">
-            <INPUT class="form-check-input" type="checkbox" name="mosfet-drivers"
-                   id="mosfet-drivers">
-            <LABEL class="form-check-label" for="mosfet-drivers">
-              Include MOSFET LED driver transistors?
+            <INPUT class="form-check-input" type="checkbox" name="transistor-drivers"
+                   id="transistor-drivers">
+            <LABEL class="form-check-label" for="transistor-drivers">
+              Include LED driver transistors?
             </LABEL>
           </DIV>
-          <SMALL id="mosfet-drivers-help" class="form-text text-muted">
+          <SMALL id="transistor-drivers-help" class="form-text text-muted">
             The LEDs in your blinky will be driven from the outputs of
             74HCxx logic gates. If you're driving a single LED, that's
             OK, but if you're driving multiple LEDs (either one group
             in total, or one group per letter), you'll probably want
-            MOSFETs between the gate outputs and the LEDs!
+            transistors between the gate outputs and the LEDs!  MBaaS
+            uses <A href="https://www.mouser.at/ProductDetail/Nexperia/MMBT3904VL?qs=sGAEpiMZZMshyDBzk1%2FWi0XuD%252BnVm%2FhOJrJzSYbKCbWHZy3ozs1XWA%3D%3D">MMBT3904 NPN</A> transistors for this, but you could
+            substitute an MMBT3904 from a different manufacturer or
+            more or less any small NPN transistor with the
+            same footprint .
           </SMALL>
         </DIV>
       </DIV>

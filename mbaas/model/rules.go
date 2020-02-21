@@ -18,5 +18,5 @@ type Rules struct {
 	LEDForwardCurrent float32    `json:"led_forward_current_mA"`
 	LEDGroups         []int      `json:"led_groups",omitempty`
 	BlinkRate         int        `json:"blink_rate_ms"`
-	MOSFETDrivers     bool       `json:"mosfet_drivers"`
+	TransistorDrivers bool       `json:"transistor_drivers"`
 }

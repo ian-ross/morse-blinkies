@@ -52,7 +52,7 @@ func (bm *BlinkyMaker) Make(text string, rules *model.Rules,
 
 	output, err := exec.Command("python", bm.Script, text, "rules.json").CombinedOutput()
 	if err != nil {
-		return "", err
+		return string(output), err
 	}
 
 	if err := renames("process-mbaas", projName, []string{"net", "info"}); err != nil {
