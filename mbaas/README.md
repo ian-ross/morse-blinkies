@@ -20,14 +20,22 @@
     start-mbaas
   python/
     process-mbaas.py
+    requirements.txt
     .venv
   lib/
     default_rules.json
     project-template/
       <template files>
+    kicad/
+      <KiCad library files>
+    assets/
+      <web app assets>
+    info/
+      <static pages>
   systemd/
     mbaas.service
     mbaas.env
+    clean-mbaas-output
 ```
 
 ## Procedure
@@ -37,12 +45,14 @@
    installation bundle.
 3. Create directories referenced in `systemd/mbaas.env` file.
 4. Create Python virtual environment in `/opt/mbaas/python` and do
-   `pip install skidl` there.
-5. Copy the KiCad libraries to `/usr/share/kicad/library`.
+   `pip install -r requirements.txt` there.
+5. Install Espresso (from
+   https://github.com/classabbyamp/espresso-logic) and `zip`.
 6. Set up the `mbaas` systemd service: environment file in
    `/etc/mbaas.env`, plus `mbaas.service` service definition.
 7. Add nginx reverse proxy for `mbaas.skybluetrades.net`, including
    setting the right port for the MBaaS service to run on.
 8. Start the `mbaas` systemd service.
+9. Install the `clean-mbaas-output` script as a daily CRON script for
+   the `mbaas` user.
 
-**MISSING: `assets` AND `info` DIRECTORIES!**

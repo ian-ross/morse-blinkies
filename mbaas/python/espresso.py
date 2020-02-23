@@ -14,7 +14,8 @@ def espresso(seqs):
         write_input_file(fp, seqs)
 
         # Run Espresso and read output.
-        cp = subprocess.run(['espresso', fp.name], capture_output=True)
+        cp = subprocess.run(['espresso', fp.name],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if cp.returncode != 0:
             raise Exception('error from Espresso: ' + cp.stderr.decode())
         espresso = cp.stdout.decode()

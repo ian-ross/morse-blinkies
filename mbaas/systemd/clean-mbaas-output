@@ -1,0 +1,2 @@
+#!/bin/bash
+find /var/run/mbaas/output -mtime +1 -print0 | xargs -0 -r rm

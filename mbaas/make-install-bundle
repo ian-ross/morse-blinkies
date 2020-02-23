@@ -10,9 +10,14 @@ cp mbaas install-root/bin
 cp start-mbaas install-root/bin
 
 cp python/*.py install-root/python
+cp python/requirements.txt install-root/pythonb
 
-cp python/default_rules.json install-root/lib
+cp lib/default_rules.json install-root/lib
 cp -r project-template install-root/lib
+cp -r /usr/share/kicad/library install-root/lib/kicad
+cp -r templates install-root/lib
+cp -r assets install-root/lib
+cp -r info install-root/lib
 
 cp systemd/mbaas.service install-root/systemd
 cp systemd/mbaas.env install-root/systemd/mbaas.env-template

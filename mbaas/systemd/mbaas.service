@@ -6,6 +6,7 @@ ConditionPathExists=/opt/mbaas/bin/mbaas
 [Service]
 EnvironmentFile=-/etc/mbaas.env
 ExecStart=/opt/mbaas/bin/start-mbaas
+WorkingDirectory=/opt/mbaas/lib
 User=mbaas
 Group=mbaas
 Restart=on-failure
