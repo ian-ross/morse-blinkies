@@ -2,7 +2,6 @@ package server
 
 import (
 	"html/template"
-	"time"
 
 	"github.com/ian-ross/morse-blinkies/mbaas/model"
 	"github.com/ian-ross/morse-blinkies/mbaas/processing"
@@ -86,7 +85,6 @@ func startWorker(bm *processing.BlinkyMaker,
 		for {
 			job := <-inCh
 			htmlURL, errorMsg, err := bm.Make(job.text, job.rules, tmpl)
-			time.Sleep(5 * time.Second)
 			if htmlURL != "" {
 				outCh <- URLNotification{htmlURL}
 			} else if errorMsg != "" {

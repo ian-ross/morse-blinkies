@@ -7,6 +7,7 @@ import sys
 
 import skidl
 
+import bom
 import espresso
 import netlist
 import placement
@@ -72,6 +73,8 @@ def make_board(text, rules):
     netlist.skidl_build(nseqs, length, c, a, rules)
     skidl.ERC()
     skidl.generate_netlist()
+
+    bom.make_bom()
 
     return info
 
