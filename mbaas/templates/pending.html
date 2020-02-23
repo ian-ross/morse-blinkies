@@ -1,9 +1,48 @@
 {{define "pending"}}
 {{template "header"}}
 <DIV class="container mt-4">
-  <DIV class="mt-5">
-    <P>Job {{.}} is pending...</P>
+  <DIV class="jumbotron mt-5">
+    <H3 class="display">Your job "{{.}}" is pending...</H3>
+    <P id="queue-position"></P>
+    <P id="error-message"></P>
   </DIV>
 </DIV>
+<SCRIPT>
+  $(document).ready(function() {
+    var jobID = "{{.}}";
+    var loc = window.location, new_uri;
+    if (loc.protocol === "https:") {
+      new_uri = "wss:";
+    } else {
+      new_uri = "ws:";
+    }
+    new_uri += "//" + loc.host + loc.pathname + "status/" + jobID;
+    var socket = new WebSocket(new_uri);
+
+    socket.onopen = function () { console.log("WS connected"); };
+
+    socket.onmessage = function (e) {
+      var msg = JSON.parse(e.data);
+      console.log(msg);
+      if ("queue_position" in msg) {
+        var qpos = msg['queue_position'];
+        if (qpos == 0) {
+          $("#queue-position").text("Your job is being processed!");
+        } else if (qpos == 1) {
+          $("#queue-position").text("There is 1 job ahead of yours in the queue.");
+        } else {
+          $("#queue-position").text("There are " + qpos + " jobs ahead of yours in the queue.");
+        }
+      }
+      if ("url" in msg) {
+        window.location = msg['url'];
+      }
+      if ("error_message" in msg) {
+        $("#queue-position").hide();
+        $('#error-message').text(msg['error_message']);
+      }
+    };
+  });
+</SCRIPT>
 {{template "footer"}}
 {{end}}

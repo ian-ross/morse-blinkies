@@ -18,7 +18,7 @@ func (s *Server) routes(devMode bool, csrfSecret string, outputDir string) chi.R
 	r.Get("/", s.home)
 	r.Get("/advanced", s.advanced)
 	r.Post("/", s.newJob)
-	r.Get("/pending/{id:[0-9]+}", s.pendingJob)
+	r.Get("/status/{id}", s.jobStatus)
 	r.Get("/sparkline", s.sparkline)
 
 	// Static files.

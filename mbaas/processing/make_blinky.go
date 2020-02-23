@@ -1,15 +1,12 @@
 package processing
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"hash/fnv"
 	"html/template"
 	"os"
 	"os/exec"
 	"path"
-	"strings"
 
 	"github.com/ian-ross/morse-blinkies/mbaas/model"
 )
@@ -17,91 +14,84 @@ import (
 // Make is the main driver function to run the Python blinky creation
 // code.
 func (bm *BlinkyMaker) Make(text string, rules *model.Rules,
-	tmpl *template.Template) (string, error) {
+	tmpl *template.Template) (string, string, error) {
 	jobDir := path.Join(bm.WorkDir, "blinky-job")
-	projName := strings.ReplaceAll(strings.ToLower(text), " ", "-")
-	unformattedJSONRules, err := json.Marshal(rules)
+	jsonRules, projName, fullProjName, err := rules.ProjectName(text)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	var out bytes.Buffer
-	json.Indent(&out, unformattedJSONRules, "", "  ")
-	jsonRules := out.Bytes()
-	h := fnv.New32a()
-	h.Write(jsonRules)
-	fullProjName := fmt.Sprintf("%s-%0x", projName, h.Sum32())
 
 	if err := os.RemoveAll(jobDir); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if err := exec.Command("cp", "-r", bm.TemplateDir, jobDir).Run(); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if err := os.Chdir(jobDir); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if err := renames("PROJECT_NAME", projName,
 		[]string{"pro", "sch", "kicad_pcb"}); err != nil {
-		return "", err
+		return "", "", err
 	}
 	rulesfp, err := os.Create("rules.json")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if _, err := rulesfp.Write(jsonRules); err != nil {
-		return "", err
+		return "", "", err
 	}
 	rulesfp.Close()
 
 	output, err := exec.Command("python", bm.Script, text, "rules.json").CombinedOutput()
 	if err != nil {
-		return string(output), err
+		return "", string(output), err
 	}
 
 	if err := renames("process-mbaas", projName, []string{"net", "info"}); err != nil {
-		return "", err
+		return "", "", err
 	}
 	if err := removes("process-mbaas",
 		[]string{".log", ".erc", "_lib_sklib.py"}); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	logfp, err := os.Create(projName + ".log")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if _, err := logfp.Write(output); err != nil {
-		return "", err
+		return "", "", err
 	}
 	logfp.Close()
 
 	zipFile := path.Join(bm.OutputDir, fullProjName+".zip")
 	if err := exec.Command("zip", "-r", zipFile, ".").Run(); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	htmlfp, err := os.Create(path.Join(bm.OutputDir, fullProjName+".html"))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	infofp, err := os.Open(projName + ".info")
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	dec := json.NewDecoder(infofp)
 	var info map[string]interface{}
 	if err := dec.Decode(&info); err != nil {
-		return "", err
+		return "", "", err
 	}
 	info["URL"] = "/output/" + fullProjName + ".zip"
 	seqlen := len(info["padded_sequence"].([]interface{})[0].(string))
 	info["SparklineWidth"] = fmt.Sprintf("%d", 10*seqlen)
 
 	if err := tmpl.ExecuteTemplate(htmlfp, "output", info); err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return "/output/" + fullProjName + ".html", nil
+	return "/output/" + fullProjName + ".html", "", nil
 }
 
 func renames(in string, out string, types []string) error {

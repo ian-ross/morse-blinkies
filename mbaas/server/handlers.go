@@ -5,9 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
+	"github.com/go-chi/chi"
 	"github.com/ian-ross/morse-blinkies/mbaas/model"
+	"github.com/rs/zerolog/log"
 )
 
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
@@ -43,23 +47,52 @@ func (s *Server) newJob(w http.ResponseWriter, r *http.Request) {
 		rules = &inRules
 	}
 
-	htmlURLOrError, err := s.bm.Make(text, rules, s.tmpl)
+	_, _, fullProjName, err := rules.ProjectName(text)
 	if err != nil {
-		msg := err.Error()
-		if htmlURLOrError != "" {
-			msg = htmlURLOrError
-		}
-		s.tmpl.ExecuteTemplate(w, "error", msg)
+		s.tmpl.ExecuteTemplate(w, "error", err.Error())
+		return
+	}
+	html := filepath.Join(s.bm.OutputDir, fullProjName+".html")
+	if _, err := os.Stat(html); err == nil {
+		http.Redirect(w, r, "/output/"+fullProjName+".html", http.StatusFound)
 		return
 	}
 
-	http.Redirect(w, r, htmlURLOrError, http.StatusFound)
-	// jobID := 1
-	// s.tmpl.ExecuteTemplate(w, "pending", jobID)
+	s.queuer.Submit(fullProjName, text, rules)
+	s.tmpl.ExecuteTemplate(w, "pending", fullProjName)
 }
 
-func (s *Server) pendingJob(w http.ResponseWriter, r *http.Request) {
+func (s *Server) jobStatus(w http.ResponseWriter, r *http.Request) {
+	jobID := chi.URLParam(r, "id")
+	conn, err := WSUpgrader.Upgrade(w, r, nil)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("couldn't upgrade connection to WebSocket"))
+		log.Error().Msg("couldn't upgrade connection to WebSocket")
+		return
+	}
 
+	// Set up status channel.
+	ch, exists := s.queuer.Subscribe(jobID)
+	if !exists {
+		fmt.Println("Oops: exists is false from Subscribe")
+		// Job should already have been processed.
+		conn.WriteJSON(URLNotification{"/output/" + jobID + ".html"})
+		return
+	}
+	conn.SetCloseHandler(func(code int, text string) error {
+		close(ch)
+		return nil
+	})
+
+	// Process messages until channel closed (triggered by WebSocket
+	// closure).
+	for msg := range ch {
+		if err = conn.WriteJSON(msg); err != nil {
+			log.Error().Msg("couldn't write status message to browser")
+			return
+		}
+	}
 }
 
 func rulesFromForm(r *http.Request, baseRules *model.Rules) (*model.Rules, error) {

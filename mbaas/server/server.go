@@ -14,6 +14,7 @@ type Server struct {
 	tmpl      *template.Template
 	bm        *processing.BlinkyMaker
 	baseRules *model.Rules
+	queuer    *Queuer
 }
 
 // NewServer creates the server structure for the user service.
@@ -29,6 +30,7 @@ func NewServer(cfg *Config) *Server {
 		cfg.OutputDir,
 		cfg.TemplateDir,
 	}
+	s.queuer = MakeQueuer(s.bm, s.tmpl)
 
 	return s
 }
