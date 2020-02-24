@@ -1,3 +1,4 @@
-# morse-blinkies
+# Morse code blinkies with KiCad, Espresso and SKIDL!
 
-Morse code blinkies with KiCad, Espresso and Skidl
+Silly project, explained
+[here](https://skybluetrades.net/morse-blinkies-as-a-service/).
