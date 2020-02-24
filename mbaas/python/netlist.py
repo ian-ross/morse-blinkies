@@ -96,11 +96,6 @@ def oscillator(vdd, gnd, blink_rate_ms, fp, r, c):
 
 # COUNTERS
 
-# TODO: PARAMETERISE BASED ON SEQUENCE LENGTH.
-#
-#  * IF LENGTH <= 16, USE ONE TIMER, ELSE USE TWO.
-#  * TIMER RESET
-
 def counters(vdd, gnd, osc, length, fp):
     print('SKIDL: counters')
     counter_lo = Part(lib, '74HC193', footprint=fp['SOIC-16'])

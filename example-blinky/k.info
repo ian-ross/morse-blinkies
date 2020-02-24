@@ -1,0 +1,15 @@
+{
+  "text": "K",
+  "sequence": [
+    "111010111"
+  ],
+  "padded_sequence": [
+    "1110101110000000"
+  ],
+  "chips": {
+    "7404 hex inverter": 1,
+    "7408 quad 2-input AND": 1,
+    "7408 triple 3-input AND": 1,
+    "7432 quad 2-input OR": 1
+  }
+}

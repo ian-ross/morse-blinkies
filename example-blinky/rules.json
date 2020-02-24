@@ -1,0 +1,18 @@
+{
+  "type": "single",
+  "led_forward_voltage_V": 2.2,
+  "led_forward_current_mA": 20,
+  "led_groups": [],
+  "blink_rate_ms": 125,
+  "transistor_drivers": false,
+  "footprints": {
+    "BATTERY": "morse-blinky:BatteryHolder_LINK_BAT-HLD-001-SMT",
+    "BJT": "Package_TO_SOT_SMD:SOT-23_Handsoldering",
+    "C": "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder",
+    "LED": "LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder",
+    "R": "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder",
+    "SOIC-14": "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm",
+    "SOIC-16": "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm",
+    "SOIC-8": "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm"
+  }
+}

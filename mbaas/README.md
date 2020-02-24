@@ -55,4 +55,3 @@
 8. Start the `mbaas` systemd service.
 9. Install the `clean-mbaas-output` script as a daily CRON script for
    the `mbaas` user.
-

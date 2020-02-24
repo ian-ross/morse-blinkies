@@ -27,12 +27,18 @@ def espresso(seqs):
 def write_input_file(fp, seqs):
     nbits = util.number_of_bits(len(seqs[0]) - 1)
 
+    print('Espresso input:')
+    print('')
+    print('.i', nbits)
     print('.i', nbits, file=fp)
+    print('.o', len(seqs))
     print('.o', len(seqs), file=fp)
 
     fmt = '{0:0' + str(nbits) + 'b}'
     for i in range(len(seqs[0])):
+        print(fmt.format(i), ''.join(['1' if s[i] else '0' for s in seqs]))
         print(fmt.format(i), ''.join(['1' if s[i] else '0' for s in seqs]), file=fp)
+    print('')
 
     fp.flush()
 
@@ -46,7 +52,10 @@ FACTORS = {
 def convert_output(lines):
     nseqs = len([l for l in lines if l.strip() != '' and l[0] != '.'][0].split(' ')[1])
     result = [[] for i in range(nseqs)]
+    print('Espresso output:')
+    print('')
     for line in lines:
+        print(line)
         if line.strip() == '':
             continue
         if line[0] == '.':
@@ -57,4 +66,5 @@ def convert_output(lines):
             if places[i] == '1':
                 result[i].append(rep)
 
+    print('')
     return result
