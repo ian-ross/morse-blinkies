@@ -1,7 +1,7 @@
 future==0.18.2
 graphviz==0.13.2
 kinparse==0.1.2
-numpy==1.18.1
+numpy==1.22.0
 pyparsing==2.4.6
 skidl==0.0.29
 toolz==0.10.0
