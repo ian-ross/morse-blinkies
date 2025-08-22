@@ -1,4 +1,4 @@
-future==0.18.2
+future==1.0.0
 graphviz==0.13.2
 kinparse==0.1.2
 numpy==1.22.0
